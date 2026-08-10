@@ -49,6 +49,19 @@ app.get('/api/boletos', (req, res) => {
     });
 });
 
+// Ruta pública para que el cliente aparte boletos en tiempo real
+app.post('/api/public/apartar', (req, res) => {
+    const { numero, nombre, telefono } = req.body;
+    const ts = Date.now();
+    db.run(`UPDATE boletos SET estado = 'apartado', nombre = ?, telefono = ?, timestamp = ? WHERE numero = ? AND estado = 'disponible'`, 
+        [nombre || '', telefono || '', ts, numero], 
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true });
+        }
+    );
+});
+
 app.post('/api/admin/login', (req, res) => {
     const { password } = req.body;
     if (password === ADMIN_PASSWORD) res.json({ success: true });
