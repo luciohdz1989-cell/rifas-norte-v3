@@ -1,33 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rifas Norte MX</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .container {
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #00e676;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifas Norte MX</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 15px; text-align: center; }
+        h1 { color: #00ff87; margin-bottom: 5px; }
+        p { color: #ccc; font-size: 14px; }
+        .instructions { background: #1e293b; padding: 12px; border-radius: 8px; border-left: 4px solid #00ff87; margin: 15px auto; max-width: 500px; text-align: left; font-size: 13px; line-height: 1.4; }
+        .notice-box { background: rgba(255, 193, 7, 0.15); border: 1px solid #ffc107; color: #ffc107; padding: 10px; border-radius: 8px; margin: 15px auto; max-width: 500px; font-size: 13px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 500px; margin: 0 auto 20px; }
+        .btn-num { background: #262626; color: #fff; border: 1px solid #333; padding: 12px 0; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .btn-num.selected { background: #00ff87; color: #000; border-color: #00ff87; }
+        .btn-num.apartado { background: #f59e0b; color: #000; cursor: not-allowed; }
+        .btn-num.pagado { background: #ef4444; color: #fff; cursor: not-allowed; }
+        .panel { background: #1e1e1e; padding: 15px; border-radius: 12px; max-width: 500px; margin: 0 auto; text-align: left; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .total { font-size: 18px; font-weight: bold; color: #00ff87; }
+        .bank-accounts { background: #262626; border-radius: 8px; padding: 12px; margin: 12px 0; }
+        .bank-accounts h4 { margin: 0 0 10px 0; color: #00ff87; text-align: center; font-size: 14px; }
+        .account { font-size: 13px; margin-bottom: 8px; font-family: monospace; }
+        .account-num { color: #00ff87; font-weight: bold; }
+        .btn-container { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-comprar { background: #00ff87; color: #000; }
+        .btn-apartar { background: #38bdf8; color: #000; }
+
+        /* Estilos del Modal / Pop-up */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1e1e1e; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: left; border: 1px solid #333; }
+        .modal-content h3 { margin-top: 0; color: #00ff87; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; margin-bottom: 4px; color: #ccc; }
+        .form-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #262626; color: #fff; box-sizing: border-box; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-cancel { background: #444; color: #fff; }
+        .btn-confirm { background: #00ff87; color: #000; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Rifas Norte MX</h1>
-    <p>¡Bienvenido! La plataforma está en línea.</p>
-  </div>
+
+    <h1>RIFAS NORTE MX</h1>
+    <p>Selecciona tus boletos y realiza tu pago</p>
+
+    <div class="instructions">
+        💳 <b>Instrucciones:</b> Elige tus boletos, realiza tu transferencia a cualquiera de las cuentas de abajo y envía tu comprobante por WhatsApp.
+    </div>
+
+    <div id="grid" class="grid"></div>
+
+    <div class="panel">
+        <div class="summary-item"><span>Boletos seleccionados:</span><span id="selected-count">0</span></div>
+        <div class="summary-item"><span>Precio por boleto:</span><span>$50 MXN</span></div>
+        <div class="summary-item total"><span>Total a pagar:</span><span id="total-price">$0 MXN</span></div>
+
+        <div class="bank-accounts">
+            <h4>CUENTAS PARA PAGO / TRANSFERENCIA</h4>
+            <div class="account"><b>Mercado Pago</b><br>CLABE: <span class="account-num">722969028348617433</span></div>
+            <div class="account"><b>BBVA</b><br>CLABE: <span class="account-num">012180015515996764</span></div>
+        </div>
+
+        <div class="notice-box">
+            ⚠️ <b>IMPORTANTE:</b> Al enviar tu comprobante por WhatsApp, no olvides incluir tu <b>Nombre Completo</b> y <b>Número de Teléfono</b>.
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-action btn-comprar" onclick="abrirModal('comprar')">COMPRAR AHORA</button>
+            <button class="btn-action btn-apartar" onclick="abrirModal('apartar')">APARTAR (24H)</button>
+        </div>
+    </div>
+
+    <!-- Modal para pedir datos del cliente -->
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-title">Confirmar Apartado</h3>
+            <p style="font-size: 13px; color: #aaa;">Ingresa tus datos para apartar tus boletos en tiempo real:</p>
+            <div class="form-group">
+                <label>Nombre Completo:</label>
+                <input type="text" id="client-name" placeholder="Ej. Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label>Número de WhatsApp:</label>
+                <input type="tel" id="client-phone" placeholder="Ej. 8441234567">
+            </div>
+            <div class="modal-btns">
+                <button class="btn-modal btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-modal btn-confirm" onclick="confirmarReserva()">Confirmar y Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WHATSAPP_NUM = "528446920971";
+        let seleccionados = [];
+        let boletosEstado = {};
+        let accionActual = 'apartar';
+
+        async function cargarBoletos() {
+            try {
+                const res = await fetch('/api/boletos');
+                const data = await res.json();
+                boletosEstado = data;
+                renderGrid();
+            } catch (e) {
+                console.error("Error cargando boletos", e);
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const numStr = i.toString().padStart(3, '0');
+                const btn = document.createElement('button');
+                btn.className = 'btn-num';
+                btn.innerText = numStr;
+                
+                const estado = boletosEstado[numStr] ? boletosEstado[numStr].estado : 'disponible';
+
+                if (estado === 'apartado') {
+                    btn.classList.add('apartado');
+                } else if (estado === 'pagado') {
+                    btn.classList.add('pagado');
+                } else {
+                    if (seleccionados.includes(numStr)) {
+                        btn.classList.add('selected');
+                    }
+                    btn.onclick = () => toggleSelect(numStr);
+                }
+                grid.appendChild(btn);
+            }
+            actualizarResumen();
+        }
+
+        function toggleSelect(num) {
+            if (seleccionados.includes(num)) {
+                seleccionados = seleccionados.filter(n => n !== num);
+            } else {
+                seleccionados.push(num);
+            }
+            renderGrid();
+        }
+
+        function actualizarResumen() {
+            document.getElementById('selected-count').innerText = seleccionados.length;
+            document.getElementById('total-price').innerText = `$${seleccionados.length * 50} MXN`;
+        }
+
+        function abrirModal(accion) {
+            if (seleccionados.length === 0) {
+                alert("Por favor selecciona al menos un boleto.");
+                return;
+            }
+            accionActual = accion;
+            document.getElementById('modal-title').innerText = accion === 'apartar' ? 'Confirmar Apartado (24h)' : 'Confirmar Compra';
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        async function confirmarReserva() {
+            const nombre = document.getElementById('client-name').value.trim();
+            const telefono = document.getElementById('client-phone').value.trim();
+
+            if (!nombre || !telefono) {
+                alert("Por favor ingresa tu Nombre y Teléfono.");
+                return;
+            }
+
+            // Registrar automáticamente cada boleto en la base de datos
+            for (let num of seleccionados) {
+                await fetch('/api/public/apartar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        numero: num,
+                        nombre: nombre,
+                        telefono: telefono,
+                        estado: 'apartado'
+                    })
+                });
+            }
+
+            const tipo = accionActual === 'apartar' ? 'APARTAR' : 'COMPRAR';
+            const boletosTexto = seleccionados.join(', ');
+            const total = seleccionados.length * 50;
+
+            const mensaje = `¡Hola! Quisiera ${tipo} los siguientes boletos para Rifas Norte MX:%0A%0A🎟️ *Boletos:* ${boletosTexto}%0A💰 *Total:* $${total} MXN%0A%0A👤 *Nombre:* ${nombre}%0A📱 *Teléfono:* ${telefono}%0A%0A(Adjunto mi comprobante de pago).`;
+
+            // Limpiar selección y recargar grilla
+            seleccionados = [];
+            cerrarModal();
+            await cargarBoletos();
+
+            // Abrir WhatsApp
+            window.open(`https://wa.me/${WHATSAPP_NUM}?text=${mensaje}`, '_blank');
+        }
+
+        cargarBoletos();
+        // Consulta actualizaciones automáticamente cada 5 segundos
+        setInterval(cargarBoletos, 5000);
+    </script>
 </body>
 </html>
